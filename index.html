@@ -1,28 +1,330 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Vue Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор Vue.js</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-</head>
-<body>
-<div id="app2">
-    <p>{{ counter }}</p>
-    <!-- @click - директива Vue для обработки кликов -->
-    <!-- Когда кнопка нажата, выполняется counter++ -->
-    <button @click="counter++">+1</button>
-</div>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<script>
-    Vue.createApp({
-        data() {
-            return {
-                // Создаем реактивную переменную counter
-                // При изменении counter Vue автоматически обновит HTML
-                counter: 0
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .calculator {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .display {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: right;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .previous-operation {
+            font-size: 18px;
+            color: #6c757d;
+            margin-bottom: 10px;
+            min-height: 27px;
+            word-wrap: break-word;
+        }
+
+        .current-operation {
+            font-size: 32px;
+            font-weight: bold;
+            color: #212529;
+            word-wrap: break-word;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .button {
+            padding: 20px;
+            font-size: 20px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .number {
+            background: #ffffff;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .number:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+        }
+
+        .operator {
+            background: #667eea;
+            color: white;
+        }
+
+        .operator:hover {
+            background: #5a6fd8;
+        }
+
+        .equals {
+            background: #28a745;
+            color: white;
+            grid-column: span 2;
+        }
+
+        .equals:hover {
+            background: #218838;
+        }
+
+        .clear {
+            background: #dc3545;
+            color: white;
+        }
+
+        .clear:hover {
+            background: #c82333;
+        }
+
+        .zero {
+            grid-column: span 2;
+        }
+
+        .history {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .history h3 {
+            color: #495057;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .history-item {
+            padding: 8px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 480px) {
+            .calculator {
+                padding: 20px;
+            }
+            
+            .button {
+                padding: 15px;
+                font-size: 18px;
+            }
+            
+            .current-operation {
+                font-size: 28px;
             }
         }
-        // Vue автоматически делает все свойства из data() доступными в шаблоне
-    }).mount('#app2');
-</script>
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="calculator">
+            <!-- Дисплей калькулятора -->
+            <div class="display">
+                <div class="previous-operation">{{ previousOperation }}</div>
+                <div class="current-operation">{{ currentOperation || '0' }}</div>
+            </div>
+            
+            <!-- Кнопки калькулятора -->
+            <div class="buttons-grid">
+                <button @click="clearAll()" class="button clear">C</button>
+                <button @click="clear()" class="button clear">CE</button>
+                <button @click="appendOperator('/')" class="button operator">/</button>
+                <button @click="appendOperator('*')" class="button operator">×</button>
+                
+                <button @click="appendNumber('7')" class="button number">7</button>
+                <button @click="appendNumber('8')" class="button number">8</button>
+                <button @click="appendNumber('9')" class="button number">9</button>
+                <button @click="appendOperator('-')" class="button operator">-</button>
+                
+                <button @click="appendNumber('4')" class="button number">4</button>
+                <button @click="appendNumber('5')" class="button number">5</button>
+                <button @click="appendNumber('6')" class="button number">6</button>
+                <button @click="appendOperator('+')" class="button operator">+</button>
+                
+                <button @click="appendNumber('1')" class="button number">1</button>
+                <button @click="appendNumber('2')" class="button number">2</button>
+                <button @click="appendNumber('3')" class="button number">3</button>
+                <button @click="calculate()" class="button equals" rowspan="2">=</button>
+                
+                <button @click="appendNumber('0')" class="button number zero">0</button>
+                <button @click="appendDecimal()" class="button number">.</button>
+            </div>
+            
+            <!-- История вычислений -->
+            <div class="history" v-if="history.length > 0">
+                <h3>История</h3>
+                <div v-for="(item, index) in history.slice().reverse()" :key="index" class="history-item">
+                    {{ item }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        Vue.createApp({
+            data() {
+                return {
+                    currentOperation: '',
+                    previousOperation: '',
+                    operator: null,
+                    waitingForNewOperand: false,
+                    history: []
+                }
+            },
+            methods: {
+                // Добавление цифры
+                appendNumber(number) {
+                    if (this.waitingForNewOperand) {
+                        this.currentOperation = number;
+                        this.waitingForNewOperand = false;
+                    } else {
+                        this.currentOperation = this.currentOperation === '0' 
+                            ? number 
+                            : this.currentOperation + number;
+                    }
+                },
+                
+                // Добавление десятичной точки
+                appendDecimal() {
+                    if (this.waitingForNewOperand) {
+                        this.currentOperation = '0.';
+                        this.waitingForNewOperand = false;
+                        return;
+                    }
+                    
+                    if (!this.currentOperation.includes('.')) {
+                        this.currentOperation += this.currentOperation === '' ? '0.' : '.';
+                    }
+                },
+                
+                // Добавление оператора
+                appendOperator(nextOperator) {
+                    const input = parseFloat(this.currentOperation);
+                    
+                    if (this.operator && this.waitingForNewOperand) {
+                        this.operator = nextOperator;
+                        this.previousOperation = this.previousOperation.slice(0, -1) + nextOperator;
+                        return;
+                    }
+                    
+                    if (this.previousOperation === '' && !isNaN(input)) {
+                        this.previousOperation = this.currentOperation + nextOperator;
+                    } else if (this.operator) {
+                        const result = this.calculateImmediate();
+                        this.previousOperation = result + nextOperator;
+                        this.currentOperation = String(result);
+                    }
+                    
+                    this.operator = nextOperator;
+                    this.waitingForNewOperand = true;
+                },
+                
+                // Вычисление результата
+                calculate() {
+                    if (this.operator && !this.waitingForNewOperand) {
+                        const result = this.calculateImmediate();
+                        const expression = this.previousOperation + this.currentOperation;
+                        
+                        // Добавляем в историю
+                        this.history.push(`${expression} = ${result}`);
+                        
+                        this.currentOperation = String(result);
+                        this.previousOperation = '';
+                        this.operator = null;
+                        this.waitingForNewOperand = true;
+                    }
+                },
+                
+                // Немедленное вычисление
+                calculateImmediate() {
+                    const prev = parseFloat(this.previousOperation);
+                    const current = parseFloat(this.currentOperation);
+                    
+                    if (isNaN(prev) || isNaN(current)) return '';
+                    
+                    switch (this.operator) {
+                        case '+':
+                            return prev + current;
+                        case '-':
+                            return prev - current;
+                        case '*':
+                            return prev * current;
+                        case '/':
+                            return current !== 0 ? prev / current : 'Ошибка';
+                        default:
+                            return current;
+                    }
+                },
+                
+                // Очистка текущего ввода
+                clear() {
+                    this.currentOperation = '';
+                },
+                
+                // Полная очистка
+                clearAll() {
+                    this.currentOperation = '';
+                    this.previousOperation = '';
+                    this.operator = null;
+                    this.waitingForNewOperand = false;
+                }
+            }
+        }).mount('#app');
+    </script>
 </body>
 </html>
