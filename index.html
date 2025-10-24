@@ -5,30 +5,24 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
-<div id="app">
-    <!-- ВАЖНО: без пробелов между {{ и }} -->
-    <p>{{ message }}</p>
-    <button @click="changeMessage">Изменить</button>
+<div id="app2">
+    <p>{{ counter }}</p>
+    <!-- @click - директива Vue для обработки кликов -->
+    <!-- Когда кнопка нажата, выполняется counter++ -->
+    <button @click="counter++">+1</button>
 </div>
 
 <script>
-// Простой тест - работает ли Vue?
-console.log('Vue loaded:', typeof Vue !== 'undefined');
-
-const app = Vue.createApp({
-    data() {
-        return {
-            message: 'Привет, Vue!'
+    createApp({
+        data() {
+            return {
+                // Создаем реактивную переменную counter
+                // При изменении counter Vue автоматически обновит HTML
+                counter: 0
+            }
         }
-    },
-    methods: {
-        changeMessage() {
-            this.message = 'Сообщение изменено в: ' + new Date().toLocaleTimeString();
-        }
-    }
-}).mount('#app');
-
-console.log('Vue app mounted:', app);
+        // Vue автоматически делает все свойства из data() доступными в шаблоне
+    }).mount('#app2');
 </script>
 </body>
 </html>
