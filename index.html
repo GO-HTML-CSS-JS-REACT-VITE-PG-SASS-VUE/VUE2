@@ -7,7 +7,7 @@
 <body>
 <div id="app">
     <!-- ВАЖНО: без пробелов между {{ и }} -->
-    <p>{{ message }}</p>
+    <p>{{ message1}}</p>
     <button @click="changeMessage">Изменить</button>
 </div>
 
@@ -18,12 +18,12 @@ console.log('Vue loaded:', typeof Vue !== 'undefined');
 const app = Vue.createApp({
     data() {
         return {
-            message: 'Привет, Vue!'
+            message1: 'Привет, Vue!'
         }
     },
     methods: {
         changeMessage() {
-            this.message = 'Сообщение изменено в: ' + new Date().toLocaleTimeString();
+            this.message1 = 'Сообщение изменено в: ' + new Date().toLocaleTimeString();
         }
     }
 }).mount('#app');
