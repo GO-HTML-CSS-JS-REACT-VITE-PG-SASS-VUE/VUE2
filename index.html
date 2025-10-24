@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Vue Example 1</title>
+    <title>Vue Test</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
 <div id="app">
-    <!-- ИСПРАВЛЕНО: убраны пробелы между фигурными скобками -->
-    <!-- Должно быть {{ message }} без пробелов -->
+    <!-- ВАЖНО: без пробелов между {{ и }} -->
     <p>{{ message }}</p>
-    
     <button @click="changeMessage">Изменить</button>
 </div>
 
 <script>
-createApp({
+// Простой тест - работает ли Vue?
+console.log('Vue loaded:', typeof Vue !== 'undefined');
+
+const app = Vue.createApp({
     data() {
         return {
             message: 'Привет, Vue!'
@@ -22,10 +23,12 @@ createApp({
     },
     methods: {
         changeMessage() {
-            this.message = 'Сообщение изменено!';
+            this.message = 'Сообщение изменено в: ' + new Date().toLocaleTimeString();
         }
     }
 }).mount('#app');
+
+console.log('Vue app mounted:', app);
 </script>
 </body>
 </html>
